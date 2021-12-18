@@ -1,5 +1,7 @@
 # Pitchfork 2022
 
+[![Lint](https://github.com/nolanbconaway/pitchfork-2022/actions/workflows/push.yaml/badge.svg)](https://github.com/nolanbconaway/pitchfork-2022/actions/workflows/push.yaml)
+
 In 2017, as I was just stepping into the data science space, [I wrote a web scraper](https://nolanbconaway.github.io/blog/2017/pitchfork-roundup.html) which populated a SQLite database of Pitchfork reviews. That dataset became [quite popular on Kaggle](https://www.kaggle.com/nolanbconaway/pitchfork-data); as of now there are 1750 notebooks exploring the data.
 
 More than five years have passed and I have gotten _a lot_ better at data modeling. I thought it might be fun to rewrite the scraper to see what I did differently, with the hopes of writing a blog post on the mistakes I naively made long ago.
