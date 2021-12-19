@@ -13,7 +13,9 @@ This repo contains the scraper code as it stands; maybe one day I will add in th
 
 - [ ] more pydantic assertions
 - [ ] make flat view with casted year, etc, types for regular reviews
-- [ ] better database assertions
+- [ ] better database assertions (at least confirm views are selectable)
+- [ ] standard reviews have a max score of 9.9 which is weird.
+- [ ] make bnm null for releases prior to bnm
 
 
 # Data Model
