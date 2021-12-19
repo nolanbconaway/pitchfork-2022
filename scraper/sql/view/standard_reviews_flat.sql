@@ -10,8 +10,8 @@ select
     , artist_count
     , artists
     , title
-    , score
-    , bnm
+    , cast(score as real) as score
+    , cast(bnm as boolean) as bnm
     , authors
     , genres
     , labels
