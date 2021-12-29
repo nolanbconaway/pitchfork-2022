@@ -7,5 +7,5 @@ dbt:
       schema: 'main'
       schemas_and_paths:
         main: '../_data/data.sqlite3'
-      schema_directory: '../_data/data.sqlite3'
+      schema_directory: '../_data'
   target: prod
