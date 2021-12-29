@@ -13,8 +13,8 @@ This repo contains the scraper code as it stands; maybe one day I will add in th
 
 - [x] more pydantic assertions
 - [x] make flat view with casted year, etc, types for regular reviews
-- [ ] better database assertions (at least confirm views are selectable)
-- [ ] make bnm null for releases prior to bnm
+- [x] better database assertions (at least confirm views are selectable)
+- [x] make bnm null for releases prior to bnm
 - [ ] spot checks on review content
 
 
@@ -88,3 +88,9 @@ I split into chunks because not _all_ computers are blessed with the memory that
 This is _much_ faster than doing everything serially. I ran into database locking issues when doing everything concurrently; so this is probably the fastest option. In the current state it ran in ~10s with 32 processes on 24k reviews.
 
 See the Data Model section for info on the schema.
+
+### 3a. Test the SQLite data
+
+- Script: `python -m scraper.test_sqlite`
+
+There are two places where I wish I had managed the data models with DBT, and this is one ([this is the other](scraper/sql/readme.md)). The idea is to run some small tests on the final SQLite data that might not be easy/possible to do in Pydantic while loading the data from the reviews. In practice the code reads like a weird combo of unit testing and DBT testing. This pains me but not enough to set up a DBT profile.

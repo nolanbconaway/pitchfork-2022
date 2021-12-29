@@ -4,6 +4,6 @@ create table tombstones (
     , picker_index int not null
     , title varchar not null
     , score real not null
-    , bnm boolean not null
-    , foreign key (review_url) references reviews(review_url)
+    , bnm boolean  -- null if pub date before jan 15 2003
+    , foreign key ( review_url) references reviews(review_url)
 )

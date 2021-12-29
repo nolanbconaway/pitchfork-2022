@@ -10,10 +10,10 @@ from pathlib import Path
 from typing import Any, Generator, Iterable, Union
 
 from bs4 import BeautifulSoup
-from pydantic import BaseModel, validator, root_validator
+from pydantic import BaseModel, root_validator, validator
 from tqdm import tqdm
 
-from ._utils import REVIEWS_SAVE_PATH, SQL_FILES, SQLITE_SAVE_PATH
+from ._utils import FIRST_BEST_NEW_MUSIC, REVIEWS_SAVE_PATH, SQL_FILES, SQLITE_SAVE_PATH
 
 
 def unique(l: list[Any]) -> list[Any]:
@@ -318,7 +318,7 @@ def insert_review(db: sqlite3.Connection, review_url: str, review: Review):
                 idx,
                 tombstone.title,
                 tombstone.score,
-                tombstone.bnm,
+                tombstone.bnm if review.pub_date >= FIRST_BEST_NEW_MUSIC else None,
             )
             for idx, tombstone in enumerate(review.tombstones)
         ],
