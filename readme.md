@@ -16,6 +16,7 @@ This repo contains the scraper code as it stands; maybe one day I will add in th
 - [x] better database assertions (at least confirm views are selectable)
 - [x] make bnm null for releases prior to bnm
 - [ ] spot checks on review content
+- [ ] detect best new reissues; maybe some way of catching reissues that are not best new?
 
 
 # Data Model
@@ -24,7 +25,7 @@ This repo contains the scraper code as it stands; maybe one day I will add in th
 
 # Data Build
 
-All of the below relies on the specific structure of Pitchfork's webpages; I do not expect things to work as-is going forward.
+All of the below relies on the specific structure of Pitchfork's webpages; I do not expect the HTML parsing to work as-is indefinitely, but the data models are sufficiently general so long as new kinds of reviews are not added.
 
 ## 1. Get a list of reviews on the website
 
