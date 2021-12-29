@@ -1,0 +1,164 @@
+version: 2
+
+models:
+  - name: reviews
+    description: |
+      A model describing reviews. Reviews can address multiple releases (tombstones)
+      from one or more artists, by one or more authors, etc. See the dervied views (e.g.,
+      standard_reviews_flat) for more useful analytic tables.
+    columns:
+      - name: review_url
+        tests:
+          - unique
+      - name: is_multi_review
+        description: Flag indicating there are multiple tombstones (releases) reviewed in the page.
+        tests:
+          - not_null
+      - name: pub_date
+        description: Publication date.
+        tests:
+          - not_null
+      - name: body
+        description: Text extracted from the review body.
+        tests:
+          - not_null
+
+  - name: artists
+    columns:
+      - name: artist_id
+        description: |
+          Dervied unique identifier. If there is a URL, this is extracted from the URL.
+          Else it is derived from the name.
+        tests:
+          - unique
+          - not_null
+      - name: name
+        description: name
+        tests:
+          - not_null
+      - name: artist_url
+        description: artist_url
+
+  - name: tombstones
+    description: |
+      A table containing data at the release level. One review can have multiple tombstones
+      and scores, etc, are applied at the tombstone level.
+    columns:
+      - name: review_tombstone_id
+        description: Concatenation of the review URL and picker index.
+        tests:
+          - not_null
+          - unique
+      - name: review_url
+        tests:
+          - not_null
+          - relationships:
+              to: ref('reviews')
+              field: review_url
+      - name: picker_index
+        description: Order of the tombstone in the album picker.
+        tests:
+          - not_null
+      - name: title
+        description: Title of the tombstone.
+        tests:
+          - not_null
+      - name: score
+        description: Score, 0.0-10.0
+        tests:
+          - not_null
+      - name: bnm
+        description: Best new music boolean; null prior to Jan 15 2003.
+
+  - name: artist_review_map
+    columns:
+      - name: review_url
+        tests:
+          - relationships:
+              to: ref('reviews')
+              field: review_url
+      - name: artist_id
+        tests:
+          - relationships:
+              to: ref('artists')
+              field: artist_id
+
+  - name: author_review_map
+    columns:
+      - name: author
+        tests:
+          - not_null
+      - name: review_url
+        tests:
+          - relationships:
+              to: ref('reviews')
+              field: review_url
+
+  - name: label_review_map
+    columns:
+      - name: label
+        tests:
+          - not_null
+      - name: review_url
+        tests:
+          - relationships:
+              to: ref('reviews')
+              field: review_url
+
+  - name: genre_review_map
+    columns:
+      - name: genre
+        tests:
+          - not_null
+      - name: review_url
+        tests:
+          - relationships:
+              to: ref('reviews')
+              field: review_url
+
+  - name: tombstone_release_year_map
+    description: |
+      Pitchfork often reviews re-releases and reports the original and re-release year.
+      Therefore a mapping is needed between the tombstone and years reported.
+    columns:
+      - name: review_tombstone_id
+        tests:
+          - relationships:
+              to: ref('tombstones')
+              field: review_tombstone_id
+      - name: release_year
+        tests:
+          - not_null
+
+  - name: reviews_flat
+    description: |
+      A flat model of all reviews. One-to-many relations (artists, authors, scores, bnm, etc) are handled
+      by comma-delimiting values. That means that nuymeric values like scores, nbm, years, are casted to
+      strings (as one review can have many scores, etc).
+
+      See standard_reviews_flat for a more useful analytic table (in which numerics are treated as numerics).
+    columns:
+      - name: review_url
+        tests:
+          - unique
+          - relationships:
+              to: ref('reviews')
+              field: review_url
+
+  - name: standard_reviews_flat
+    description:
+      A flat model of all "standard" reviews- reviews with one tombstone of releases
+      that are current as of the time of publication. The quintessential pitchfork review.
+
+      Because these are not multi-reviews and not re-releases, numeric values can be treated
+      as numeric. This is the go-to table for analytic workloads.
+
+      The remaining one-to-many relations (artists, authors, labels, genres) are handled
+      by comma-delimiting values.
+    columns:
+      - name: review_url
+        tests:
+          - unique
+          - relationships:
+              to: ref('reviews')
+              field: review_url

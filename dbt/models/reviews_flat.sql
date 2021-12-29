@@ -1,4 +1,4 @@
-create view reviews_flat as
+{{ config(materialized='view') }}
 -- a flat model of all reviews, for common aggs.
 -- this view does aggs and joins on indexes, so it should be fairly efficient.
 
@@ -7,8 +7,8 @@ with artist_group as (
         artist_review_map.review_url
         , group_concat(artists.name, ', ') as artists
         , count(*) as artist_count
-    from artists
-    inner join artist_review_map
+    from {{ ref('artists') }} as artists
+    inner join {{ ref('artist_review_map') }} as artist_review_map
         on artists.artist_id = artist_review_map.artist_id
     group by artist_review_map.review_url
 )
@@ -17,7 +17,7 @@ with artist_group as (
     select
         review_url
         , group_concat(author, ', ') as authors
-    from author_review_map
+    from {{ ref('author_review_map') }}
     group by review_url
 )
 
@@ -25,7 +25,7 @@ with artist_group as (
     select
         review_url
         , group_concat(genre, ', ') as genres
-    from genre_review_map
+    from {{ ref('genre_review_map') }}
     group by review_url
 )
 
@@ -33,7 +33,7 @@ with artist_group as (
     select
         review_url
         , group_concat(label, ', ') as labels
-    from label_review_map
+    from {{ ref('label_review_map') }}
     group by review_url
 )
 
@@ -44,7 +44,7 @@ with artist_group as (
         , group_concat(score, ', ') as score
         , group_concat(bnm, ', ') as bnm
         , count(*) as releases_reviewed
-    from tombstones
+    from {{ ref('tombstones') }}
     group by review_url
 )
 
@@ -53,8 +53,8 @@ with artist_group as (
         tombstones.review_url
         , group_concat(release_year_map.release_year, ', ') as release_year
         , count(*) > 1 as has_multiple_release_years
-    from tombstones
-    inner join tombstone_release_year_map as release_year_map
+    from {{ ref('tombstones') }} as tombstones
+    inner join {{ ref('tombstone_release_year_map') }} as release_year_map
         on tombstones.review_tombstone_id = release_year_map.review_tombstone_id
     group by tombstones.review_url
 )
@@ -84,7 +84,7 @@ select
     -- save this big payload for last.
     , reviews.body
 
-from reviews
+from {{ ref('reviews') }} as reviews
 inner join tombstone_group
     on tombstone_group.review_url = reviews.review_url
 left join artist_group

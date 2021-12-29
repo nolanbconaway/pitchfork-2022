@@ -69,10 +69,22 @@ A selenium browser is used to navigate to each URL and save whatever is under th
 
 ## 3. Build a SQLite database using the saved reviews
 
-- Script: `python -m scraper.make_sqlite`
+- Script: `python -m scraper.make_sqlite --procs=max`
 - Writes: `_data/data.sqlite3` 
 
-This is the final step, which prepares the analytics-ready sqlite database. Each review's HTML is parsed via Beautifulsoup to extract out relevant info. 
+This is the final step, which prepares the analytics-ready sqlite database. Each review's HTML is parsed via Beautifulsoup to extract out relevant info, and the SQLite tables are populated off of Pydantic models.
+
+As is, `python -m scraper.make_sqlite` will run all of the below steps, but the DBT steps can be excluded via `--no-dbt`.
+
+### 3a. Create data models
+
+- DBT shorthand: `dbt run --profiles-dir=dbt --project-dir=dbt`
+
+The target data file is first deleted, then DBT is used to create a new file and run `create table` statements (using a [custom materialization](dbt/macros/create.sql)). Unlike in the usual DBT process, no data are present at this time so the data models are empty. See the Data Model section for info on the schema.
+
+### 3b. Insert data
+
+In this step, HTML is parsed and passed to [Pydantic models](scraper/models.py) that validate the data prior to running `insert` statements on the empty tables.
 
 I have it set up to run in chunks of <= 1000 URLs, depending on how many there are. The data are processed like:
 
@@ -85,12 +97,10 @@ for chunk in chunks
 
 I split into chunks because not _all_ computers are blessed with the memory that mine is.
 
-This is _much_ faster than doing everything serially. I ran into database locking issues when doing everything concurrently; so this is probably the fastest option. In the current state it ran in ~10s with 32 processes on 24k reviews.
+This is _much_ faster than doing everything serially. I ran into database locking issues when doing everything concurrently; so this is probably the fastest option. In the current state it ran in ~10s with `--procs=max` (32 processes on my machine) on 24k reviews.
 
-See the Data Model section for info on the schema.
+### 3c. Test the data
 
-### 3a. Test the SQLite data
+- DBT shorthand: `dbt test --profiles-dir=dbt --project-dir=dbt`
 
-- Script: `python -m scraper.test_sqlite`
-
-There are two places where I wish I had managed the data models with DBT, and this is one ([this is the other](scraper/sql/readme.md)). The idea is to run some small tests on the final SQLite data that might not be easy/possible to do in Pydantic while loading the data from the reviews. In practice the code reads like a weird combo of unit testing and DBT testing. This pains me but not enough to set up a DBT profile.
+The data are tested a fair amount when loaded into Pydantic models, as well as upon insert into the SQLite data; but this final step ensures all tables are selectable and that the schema is internally consistent.
