@@ -18,7 +18,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: SQLFluff
-        run: sqlfluff lint dbt/models --nocolor
+        run: sqlfluff lint dbt/models --nocolor --verbose
 
       - name: Black
         run: black scraper --check
