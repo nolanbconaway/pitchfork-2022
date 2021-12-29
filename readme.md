@@ -11,10 +11,11 @@ This repo contains the scraper code as it stands; maybe one day I will add in th
 
 ## TODO
 
-- [ ] more pydantic assertions
-- [ ] make flat view with casted year, etc, types for regular reviews
+- [x] more pydantic assertions
+- [x] make flat view with casted year, etc, types for regular reviews
 - [ ] better database assertions (at least confirm views are selectable)
 - [ ] make bnm null for releases prior to bnm
+- [ ] spot checks on review content
 
 
 # Data Model

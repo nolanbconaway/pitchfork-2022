@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Generator, Iterable, Union
 
 from bs4 import BeautifulSoup
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, root_validator
 from tqdm import tqdm
 
 from ._utils import REVIEWS_SAVE_PATH, SQL_FILES, SQLITE_SAVE_PATH
@@ -66,6 +66,17 @@ class Artist(BaseModel):
     name: str
     url: Union[str, None]
 
+    @validator("url", always=True)
+    def check_url_startswith_artist(cls, v):
+        if v is not None and not v.startswith("/artists/"):
+            raise ValueError(f"{v} is not a valid URL.")
+        return v
+
+    @validator("name", always=True)
+    def check_name_has_value(cls, v):
+        assert v
+        return v
+
     @property
     def artist_id(self) -> str:
         if self.url is None:
@@ -81,6 +92,16 @@ class Tombstone(BaseModel):
     release_years: Union[list[int], None]
     score: float
     bnm: bool
+
+    @validator("title", always=True)
+    def check_title_has_value(cls, v):
+        assert v
+        return v
+
+    @validator("score", always=True)
+    def check_score_bounds(cls, v):
+        assert v >= 0 and v <= 10
+        return v
 
     @classmethod
     def from_soup(cls, soup: BeautifulSoup) -> "Tombstone":
@@ -129,6 +150,31 @@ class Review(BaseModel):
     authors: list[str]
     tombstones: list[Tombstone]
 
+    @validator("pub_date", always=True)
+    def check_pub_date_value(cls, v):
+        assert v >= datetime.datetime(1999, 1, 1)
+        return v
+
+    @validator("artists", "authors", "tombstones", always=True)
+    def check_has_values(cls, v):
+        assert v
+        return v
+
+    @root_validator
+    def check_body_except_jet_shine_on(cls, values):
+        """Make an assertion about the review body.
+
+        Pitchfork hilariously reviewed Shine on by Jet with a video of a chimpanzee
+        peeing, so need to except that.
+        """
+        first_title = values["tombstones"][0].title
+        first_artist = values["artists"][0].name
+        if first_title == "Shine On" and first_artist == "Jet":
+            values["body"] = "https://www.youtube.com/watch?v=SvZmRv6U_s0&t=1s"
+            return values
+        assert values["body"]
+        return values
+
     @classmethod
     def from_html(cls, html: str) -> "Review":
         """Create a Review object from an HTML string."""
@@ -166,28 +212,21 @@ class Review(BaseModel):
     @staticmethod
     def get_pub_date(soup: BeautifulSoup) -> datetime.datetime:
         time_ = soup.find("time", {"class": "pub-date"})
-        assert time_ is not None
         return datetime.datetime.fromisoformat(time_["datetime"])
 
     @classmethod
     def get_release_labels(cls, soup: BeautifulSoup) -> list[str]:
         ul = soup.find("ul", {"class": ["labels-list"]})
-        assert ul is not None
         return unique([i.text.strip() for i in ul.findAll("li")])
 
     @staticmethod
     def get_review_body(soup: BeautifulSoup) -> str:
-        div = soup.find("div", {"class": "review-body"}).find(
-            "div", {"class": "contents"}
-        )
-        assert div is not None
-        # they end the article with a hr tag and then add some junk.
+        div = soup.find("div", {"class": "review-detail__article-content"})
         ps = []
-        for el in div.find_all(["p", "hr"], recursive=False):
+        for el in div.find_all(["p", "hr"]):
             if el.name == "hr":
                 break
             ps.append(el.text.strip())
-
         return "\n\n".join(ps)
 
     @staticmethod
@@ -199,7 +238,6 @@ class Review(BaseModel):
     @staticmethod
     def get_authors(soup: BeautifulSoup) -> list[str]:
         ul = soup.find("ul", {"class": "authors-detail"})
-        assert ul is not None
         return unique(
             [
                 i.text.strip()
@@ -212,14 +250,12 @@ class Review(BaseModel):
         """Get the tombstone metadata, with multi album logic."""
         if cls.check_multi_review(soup):
             ul = soup.find("ul", {"class": "review-tombstones"})
-            assert ul is not None
             return [
                 Tombstone.from_soup(div)
                 for div in ul.find_all("div", {"class": "single-album-tombstone"})
             ]
         else:
             div = soup.find("div", {"class": "single-album-tombstone"})
-            assert div is not None
             return [Tombstone.from_soup(div)]
 
 
@@ -351,10 +387,15 @@ if __name__ == "__main__":
     for fpath in SQL_FILES["ddl"]:
         db.execute(fpath.read_text())
 
-    def f(fpath: Path):
+    def f(fpath: Path) -> tuple[str, Review]:
         with gzip.open(fpath, "rb") as f:
             json_data = json.load(f)
-        return json_data["url"], Review.from_html(json_data["html"])
+        try:
+            review = Review.from_html(json_data["html"])
+        except Exception:
+            print(f"Error parsing {fpath}")
+            raise
+        return json_data["url"], review
 
     chunks = list(chunker(review_jsons, min(1000, len(review_jsons))))
 
