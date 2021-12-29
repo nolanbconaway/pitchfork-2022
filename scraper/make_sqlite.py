@@ -64,12 +64,14 @@ def parse_args() -> argparse.Namespace:
 
 class Artist(BaseModel):
     name: str
+    # some artists have no URL (various, etc)
     url: Union[str, None]
 
     @validator("url", always=True)
     def check_url_startswith_artist(cls, v):
-        if v is not None and not v.startswith("/artists/"):
-            raise ValueError(f"{v} is not a valid URL.")
+        if v is not None:
+            assert v.startswith("/artists/")
+            assert v.endswith("/")
         return v
 
     @validator("name", always=True)
@@ -81,7 +83,7 @@ class Artist(BaseModel):
     def artist_id(self) -> str:
         if self.url is None:
             return "various-" + self.name.replace(" ", "-").lower()
-        return self.url.lstrip("/artists/")
+        return self.url.lstrip("/artists/").rstrip("/")
 
     def __hash__(self) -> int:
         return (self.name, self.url).__hash__()
