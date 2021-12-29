@@ -1,7 +1,8 @@
 import datetime
+import subprocess
 import time
 from pathlib import Path
-
+import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -10,6 +11,7 @@ DEFAULT_TIMEOUT: float = 5.0
 PAGES_SAVE_PATH: Path = Path("_data/pages/")
 REVIEWS_SAVE_PATH: Path = Path("_data/reviews/")
 SQLITE_SAVE_PATH: Path = Path("_data/data.sqlite3")
+DBT_PATH: Path = Path("dbt")
 FIRST_BEST_NEW_MUSIC: datetime.datetime = datetime.datetime(2003, 1, 15)
 
 SQL_FILES: dict[str, list[Path]] = {
@@ -19,6 +21,13 @@ SQL_FILES: dict[str, list[Path]] = {
         list((Path(__file__).parent.resolve() / "sql/index").glob("*.sql"))
     ),
 }
+
+
+def dbt(*args):
+    """Execute a dbt command in the project."""
+    return subprocess.call(
+        ["dbt", *args, f"--profiles-dir={DBT_PATH}", f"--project-dir={DBT_PATH}"]
+    )
 
 
 class DriverContext:

@@ -1,3 +1,10 @@
 _data/
 .vscode
 __pycache__
+.python-version
+logs
+target
+dbt/logs
+dbt/target/
+dbt/dbt_packages/
+dbt/.user.yml

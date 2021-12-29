@@ -1,9 +1,12 @@
 [sqlfluff]
 dialect = sqlite
 exclude_rules = L031
+templater = dbt
 
 [sqlfluff:rules]
 comma_style = leading
 max_line_length = 100
 
-
+[sqlfluff:templater:dbt]
+project_dir = dbt
+profiles_dir = dbt

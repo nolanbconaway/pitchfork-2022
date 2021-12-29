@@ -1,7 +1,6 @@
-create view standard_reviews_flat as
+{{ config(materialized='view') }}
 -- a flat model of all standard reviews; exclude reissues, multi reviews, etc.
 -- i.e., the usual p4k review.
-
 
 select
     review_url
@@ -19,7 +18,7 @@ select
     , cast(release_year as int) as release_year
     , body
 
-from reviews_flat
+from {{ ref('reviews_flat') }}
 
 /*
 RULE: a standard review was written in the year of, or immediately prior/after the
