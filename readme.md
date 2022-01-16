@@ -8,15 +8,9 @@ More than five years have passed and I have gotten _a lot_ better at data modeli
 
 This repo contains the scraper code as it stands; maybe one day I will add in the data. I call it `pitchfork-2022` because I will definitely not finish in 2021.
 
+# Data Model
 
-## TODO
-
-- [x] more pydantic assertions
-- [x] make flat view with casted year, etc, types for regular reviews
-- [x] better database assertions (at least confirm views are selectable)
-- [x] make bnm null for releases prior to bnm
-- [ ] spot checks on review content
-- [x] detect best new reissues; maybe some way of catching reissues that are not best new?
+![](schema.png)
 
 ## Known Issues
 
@@ -31,9 +25,6 @@ As far as I can tell, there is no _"is reissue"_ tag hidden in the review HTML. 
  
 But I have found cases in which Pitchfork only reports the reissue year and which are not Best New Reissue ([example](https://pitchfork.com/reviews/albums/violent-femmes-why-do-birds-sing-deluxe-edition/)). In these cases I have found little to use which would support identification of a reissue.
 
-# Data Model
-
-![](schema.png)
 
 # Data Build
 
@@ -117,3 +108,16 @@ This is _much_ faster than doing everything serially. I ran into database lockin
 - DBT shorthand: `dbt test --profiles-dir=dbt --project-dir=dbt`
 
 The data are tested a fair amount when loaded into Pydantic models, as well as upon insert into the SQLite data; but this final step ensures all tables are selectable and that the schema is internally consistent.
+
+## 4. Spot checks on body content
+
+- Script: `python -m scraper.spot_check`
+
+Although the DBT testing does a good job of making assertions about the data _in general_, it does not really test that the scraper accurately pulled the content from the reviews. The body content is full of weird unicode, and is delimited by a spare `hr` tag at times.
+
+It would be impossible to test _all_ of the review contents, so instead spot checks have been manually configured. The more the better, but right now I've configured only a handful.These spot checks have _already_ uncovered several bugs. The spot checks do the following:
+
+- Make assertions about the total number of paragraphs.
+- Make assertions about the presence of snippets of text in the body.
+
+The handful of checked reviews I added span from 2001 to 2020 (and hopefully capture some of the changes Pitchfork implemented in that period). For each, I have tried to add one snippet from the start and one from the end of the review. I also made sure to add checks of weird unicode when I find it.
