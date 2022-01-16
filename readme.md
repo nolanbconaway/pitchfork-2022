@@ -8,15 +8,9 @@ More than five years have passed and I have gotten _a lot_ better at data modeli
 
 This repo contains the scraper code as it stands; maybe one day I will add in the data. I call it `pitchfork-2022` because I will definitely not finish in 2021.
 
+# Data Model
 
-## TODO
-
-- [x] more pydantic assertions
-- [x] make flat view with casted year, etc, types for regular reviews
-- [x] better database assertions (at least confirm views are selectable)
-- [x] make bnm null for releases prior to bnm
-- [ ] spot checks on review content
-- [x] detect best new reissues; maybe some way of catching reissues that are not best new?
+![](schema.png)
 
 ## Known Issues
 
@@ -31,9 +25,6 @@ As far as I can tell, there is no _"is reissue"_ tag hidden in the review HTML. 
  
 But I have found cases in which Pitchfork only reports the reissue year and which are not Best New Reissue ([example](https://pitchfork.com/reviews/albums/violent-femmes-why-do-birds-sing-deluxe-edition/)). In these cases I have found little to use which would support identification of a reissue.
 
-# Data Model
-
-![](schema.png)
 
 # Data Build
 
