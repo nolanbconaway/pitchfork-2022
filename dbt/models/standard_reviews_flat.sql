@@ -10,7 +10,7 @@ select
     , artists
     , title
     , cast(score as real) as score
-    , cast(bnm as boolean) as bnm
+    , cast(best_new_music as boolean) as best_new_music
     , authors
     , genres
     , labels
@@ -29,10 +29,4 @@ Justification: sometimes p4k reviews UPCOMING releases in like december. Sometim
 p4k reviews a release from the prior month in january. Mostly p4k reviews a release in
 the year of.
 */
-where not has_multiple_release_years
-    and not is_multi_review
-    and cast(strftime('%Y', pub_date) as int) in (
-        cast(release_year as int) - 1
-        , cast(release_year as int)
-        , cast(release_year as int) + 1
-    )
+where is_standard_review

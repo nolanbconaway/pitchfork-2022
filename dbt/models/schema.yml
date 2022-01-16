@@ -10,8 +10,10 @@ models:
       - name: review_url
         tests:
           - unique
-      - name: is_multi_review
-        description: Flag indicating there are multiple tombstones (releases) reviewed in the page.
+      - name: is_standard_review
+        description: | 
+          Flag indicating the review is a a single, recent, non-reissue album. The 
+          ordinary Pitchfork Review. 
         tests:
           - not_null
       - name: pub_date
@@ -67,8 +69,10 @@ models:
         description: Score, 0.0-10.0
         tests:
           - not_null
-      - name: bnm
+      - name: best_new_music
         description: Best new music boolean; null prior to Jan 15 2003.
+      - name: best_new_reissue
+        description: Best new reissue boolean; null prior to Jan 8 2009.
 
   - name: artist_review_map
     columns:

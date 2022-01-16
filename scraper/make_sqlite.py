@@ -11,7 +11,13 @@ from typing import Any, Generator, Iterable
 from .models import Review
 from tqdm import tqdm
 
-from ._utils import dbt, FIRST_BEST_NEW_MUSIC, REVIEWS_SAVE_PATH, SQLITE_SAVE_PATH
+from ._utils import (
+    dbt,
+    FIRST_BEST_NEW_MUSIC,
+    FIRST_BEST_NEW_REISSUE,
+    REVIEWS_SAVE_PATH,
+    SQLITE_SAVE_PATH,
+)
 
 
 def chunker(seq: Iterable, size: int) -> Generator:
@@ -88,8 +94,15 @@ def insert_review(db: sqlite3.Connection, review_url: str, review: Review):
     insert_many(
         db,
         "reviews",
-        ["review_url", "is_multi_review", "body", "pub_date"],
-        [(review_url, review.is_multi_review, review.body, review.pub_date)],
+        ["review_url", "is_standard_review", "body", "pub_date"],
+        [
+            (
+                review_url,
+                review.is_standard_review,
+                review.body,
+                review.pub_date,
+            )
+        ],
     )
 
     insert_many(
@@ -103,7 +116,15 @@ def insert_review(db: sqlite3.Connection, review_url: str, review: Review):
     insert_many(
         db,
         "tombstones",
-        ["review_tombstone_id", "review_url", "picker_index", "title", "score", "bnm"],
+        [
+            "review_tombstone_id",
+            "review_url",
+            "picker_index",
+            "title",
+            "score",
+            "best_new_music",
+            "best_new_reissue",
+        ],
         [
             (
                 f"""{review_url}-{idx}""",
@@ -111,7 +132,12 @@ def insert_review(db: sqlite3.Connection, review_url: str, review: Review):
                 idx,
                 tombstone.title,
                 tombstone.score,
-                tombstone.bnm if review.pub_date >= FIRST_BEST_NEW_MUSIC else None,
+                tombstone.best_new_music
+                if review.pub_date >= FIRST_BEST_NEW_MUSIC
+                else None,
+                tombstone.best_new_reissue
+                if review.pub_date >= FIRST_BEST_NEW_REISSUE
+                else None,
             )
             for idx, tombstone in enumerate(review.tombstones)
         ],

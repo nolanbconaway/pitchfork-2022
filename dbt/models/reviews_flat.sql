@@ -42,8 +42,8 @@ with artist_group as (
         review_url
         , group_concat(title, ', ') as title
         , group_concat(score, ', ') as score
-        , group_concat(bnm, ', ') as bnm
-        , count(*) as releases_reviewed
+        , group_concat(best_new_music, ', ') as best_new_music
+        , group_concat(best_new_reissue, ', ') as best_new_reissue
     from {{ ref('tombstones') }}
     group by review_url
 )
@@ -52,7 +52,6 @@ with artist_group as (
     select
         tombstones.review_url
         , group_concat(release_year_map.release_year, ', ') as release_year
-        , count(*) > 1 as has_multiple_release_years
     from {{ ref('tombstones') }} as tombstones
     inner join {{ ref('tombstone_release_year_map') }} as release_year_map
         on tombstones.review_tombstone_id = release_year_map.review_tombstone_id
@@ -63,16 +62,15 @@ select
     reviews.review_url
 
     -- metas
-    , reviews.is_multi_review
+    , reviews.is_standard_review
     , artist_group.artist_count as artist_count
-    , tombstone_group.releases_reviewed
-    , release_year_group.has_multiple_release_years
 
     -- core info
     , artist_group.artists as artists
     , tombstone_group.title
     , tombstone_group.score
-    , tombstone_group.bnm
+    , tombstone_group.best_new_music
+    , tombstone_group.best_new_reissue
     , author_group.authors as authors
     , genre_group.genres as genres
     , label_group.labels as labels

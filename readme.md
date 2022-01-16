@@ -16,8 +16,20 @@ This repo contains the scraper code as it stands; maybe one day I will add in th
 - [x] better database assertions (at least confirm views are selectable)
 - [x] make bnm null for releases prior to bnm
 - [ ] spot checks on review content
-- [ ] detect best new reissues; maybe some way of catching reissues that are not best new?
+- [x] detect best new reissues; maybe some way of catching reissues that are not best new?
 
+## Known Issues
+
+### Identifying Reissues
+
+As far as I can tell, there is no _"is reissue"_ tag hidden in the review HTML. Reissues can be identified in obvious cases:
+
+- When there are multiple release years reported.
+- When the review is tagged as "Best New Reissue".
+- When the publication date is years after the reported release date.'
+- When the review is published on a Sunday and opens with the usual preamble (_Each Sunday, Pitchfork takes an in-depth..._).
+ 
+But I have found cases in which Pitchfork only reports the reissue year and which are not Best New Reissue ([example](https://pitchfork.com/reviews/albums/violent-femmes-why-do-birds-sing-deluxe-edition/)). In these cases I have found little to use which would support identification of a reissue.
 
 # Data Model
 
