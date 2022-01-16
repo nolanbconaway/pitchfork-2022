@@ -6,6 +6,19 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel, root_validator, validator
 
 
+def sanitize_paragraph(para: str) -> str:
+    """Do some sanitization of body paragraphs."""
+
+    return (
+        para.strip()
+        .replace(u"\u00A0", " ")  # non breaking space
+        .replace(u"\u2018", "'")  # left single quote
+        .replace(u"\u2019", "'")  # right single quote
+        .replace(u"\u201C", '"')  # left double quote
+        .replace(u"\u201D", '"')  # right double quote
+    )
+
+
 def unique(l: list[Any]) -> list[Any]:
     """Get unique items and retain order. Thx stackoverflow."""
     seen = set()
@@ -192,12 +205,15 @@ class Review(BaseModel):
 
     @staticmethod
     def get_review_body(soup: BeautifulSoup) -> str:
-        div = soup.find("div", {"class": "review-detail__text"})
+        div = soup.find("div", {"class": "review-detail__text"}).find(
+            "div", {"class": "contents"}
+        )
+        # modern reviews are ended with an hr and then some nonsense. so clip at hr.
         ps = []
         for el in div.find_all(["p", "hr"]):
             if el.name == "hr":
                 break
-            ps.append(el.text.strip())
+            ps.append(sanitize_paragraph(el.text))
         return "\n\n".join(ps)
 
     @classmethod

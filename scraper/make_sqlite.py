@@ -3,21 +3,20 @@ import argparse
 import gzip
 import json
 import multiprocessing
-import random
 import sqlite3
 from pathlib import Path
 from typing import Any, Generator, Iterable
 
-from .models import Review
 from tqdm import tqdm
 
 from ._utils import (
-    dbt,
     FIRST_BEST_NEW_MUSIC,
     FIRST_BEST_NEW_REISSUE,
     REVIEWS_SAVE_PATH,
     SQLITE_SAVE_PATH,
+    dbt,
 )
+from .models import Review
 
 
 def chunker(seq: Iterable, size: int) -> Generator:
