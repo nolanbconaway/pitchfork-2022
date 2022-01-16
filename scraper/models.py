@@ -102,7 +102,6 @@ class Tombstone(BaseModel):
 
 
 class Review(BaseModel):
-    is_multi_review: bool
     artists: list[Artist]
     body: str
     is_sunday_review: bool
@@ -152,7 +151,6 @@ class Review(BaseModel):
         """Create a Review object from an HTML string."""
         soup = BeautifulSoup(html, "lxml")
         return cls(
-            is_multi_review=cls.check_multi_review(soup),
             artists=cls.get_artists(soup),
             genres=cls.get_genres(soup),
             body=cls.get_review_body(soup),
@@ -239,3 +237,40 @@ class Review(BaseModel):
         else:
             div = soup.find("div", {"class": "single-album-tombstone"})
             return [Tombstone.from_soup(div)]
+
+    @property
+    def is_standard_review(self) -> bool:
+        """Return True if the review is a standard review.
+
+        This is NOT a pitchfork concept, but a rule-based derivation that I made up to
+        identify "ordinary" reviews.
+
+        Excludes:
+            - Sunday reviews
+            - Multi-album reviews
+            - Any best new reissue
+            - Anything with multiple release years
+            - Any review posted long after the release date
+        """
+        if self.is_sunday_review:
+            return False
+        if len(self.tombstones) > 1:
+            return False
+
+        tombstone = self.tombstones[0]
+
+        if tombstone.best_new_reissue:
+            return False
+
+        release_years = tombstone.release_years
+        if release_years is None:
+            return True
+
+        if len(release_years) > 1:
+            return False
+
+        if release_years[0] < (self.pub_date.year - 1):
+            # sometimes dec reviews are posted in jan
+            return False
+
+        return True

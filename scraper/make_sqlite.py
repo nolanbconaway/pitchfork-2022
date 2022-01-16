@@ -94,13 +94,12 @@ def insert_review(db: sqlite3.Connection, review_url: str, review: Review):
     insert_many(
         db,
         "reviews",
-        ["review_url", "is_multi_review", "body", "is_sunday_review", "pub_date"],
+        ["review_url", "is_standard_review", "body", "pub_date"],
         [
             (
                 review_url,
-                review.is_multi_review,
+                review.is_standard_review,
                 review.body,
-                review.is_sunday_review,
                 review.pub_date,
             )
         ],

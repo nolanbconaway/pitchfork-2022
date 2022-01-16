@@ -29,12 +29,5 @@ Justification: sometimes p4k reviews UPCOMING releases in like december. Sometim
 p4k reviews a release from the prior month in january. Mostly p4k reviews a release in
 the year of.
 */
-where not has_multiple_release_years
-    and not is_multi_review
-    and not is_sunday_review
-    and not cast(coalesce(best_new_reissue, '0') as boolean)
-    and cast(strftime('%Y', pub_date) as int) in (
-        cast(release_year as int) - 1
-        , cast(release_year as int)
-        , cast(release_year as int) + 1
-    )
+where is_standard_review
+
