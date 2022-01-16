@@ -32,7 +32,7 @@ the year of.
 where not has_multiple_release_years
     and not is_multi_review
     and not is_sunday_review
-    and not cast(coalesce(best_new_reissue, 0) as boolean)
+    and not cast(coalesce(best_new_reissue, '0') as boolean)
     and cast(strftime('%Y', pub_date) as int) in (
         cast(release_year as int) - 1
         , cast(release_year as int)

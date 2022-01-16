@@ -22,6 +22,11 @@ models:
         description: Text extracted from the review body.
         tests:
           - not_null
+      - name: is_sunday_review
+        description: |
+          Boolean indicating the review is a sunday review of a classic release.
+        tests:
+          - not_null
 
   - name: artists
     columns:
@@ -67,8 +72,10 @@ models:
         description: Score, 0.0-10.0
         tests:
           - not_null
-      - name: bnm
+      - name: best_new_music
         description: Best new music boolean; null prior to Jan 15 2003.
+      - name: best_new_reissue
+        description: Best new reissue boolean; null prior to Jan 8 2009.
 
   - name: artist_review_map
     columns:

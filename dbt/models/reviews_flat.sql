@@ -42,7 +42,8 @@ with artist_group as (
         review_url
         , group_concat(title, ', ') as title
         , group_concat(score, ', ') as score
-        , group_concat(bnm, ', ') as bnm
+        , group_concat(best_new_music, ', ') as best_new_music
+        , group_concat(best_new_reissue, ', ') as best_new_reissue
         , count(*) as releases_reviewed
     from {{ ref('tombstones') }}
     group by review_url
@@ -64,6 +65,7 @@ select
 
     -- metas
     , reviews.is_multi_review
+    , reviews.is_sunday_review
     , artist_group.artist_count as artist_count
     , tombstone_group.releases_reviewed
     , release_year_group.has_multiple_release_years
@@ -72,7 +74,8 @@ select
     , artist_group.artists as artists
     , tombstone_group.title
     , tombstone_group.score
-    , tombstone_group.bnm
+    , tombstone_group.best_new_music
+    , tombstone_group.best_new_reissue
     , author_group.authors as authors
     , genre_group.genres as genres
     , label_group.labels as labels

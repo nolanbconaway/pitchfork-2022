@@ -8,4 +8,5 @@ create table {{ this }} (
     , is_multi_review boolean not null
     , pub_date datetime not null
     , body text not null
+    , is_sunday_review boolean not null
 )

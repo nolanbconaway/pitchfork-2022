@@ -13,14 +13,7 @@ REVIEWS_SAVE_PATH: Path = Path("_data/reviews/")
 SQLITE_SAVE_PATH: Path = Path("_data/data.sqlite3")
 DBT_PATH: Path = Path("dbt")
 FIRST_BEST_NEW_MUSIC: datetime.datetime = datetime.datetime(2003, 1, 15)
-
-SQL_FILES: dict[str, list[Path]] = {
-    "ddl": sorted(list((Path(__file__).parent.resolve() / "sql/ddl").glob("*.sql"))),
-    "view": sorted(list((Path(__file__).parent.resolve() / "sql/view").glob("*.sql"))),
-    "index": sorted(
-        list((Path(__file__).parent.resolve() / "sql/index").glob("*.sql"))
-    ),
-}
+FIRST_BEST_NEW_REISSUE: datetime.datetime = datetime.datetime(2009, 1, 8)
 
 
 def dbt(*args):
