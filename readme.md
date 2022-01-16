@@ -117,3 +117,16 @@ This is _much_ faster than doing everything serially. I ran into database lockin
 - DBT shorthand: `dbt test --profiles-dir=dbt --project-dir=dbt`
 
 The data are tested a fair amount when loaded into Pydantic models, as well as upon insert into the SQLite data; but this final step ensures all tables are selectable and that the schema is internally consistent.
+
+## 4. Spot checks on body content
+
+- Script: `python -m scraper.spot_check`
+
+Although the DBT testing does a good job of making assertions about the data _in general_, it does not really test that the scraper accurately pulled the content from the reviews. The body content is full of weird unicode, and is delimited by a spare `hr` tag at times.
+
+It would be impossible to test _all_ of the review contents, so instead spot checks have been manually configured. The more the better, but right now I've configured only a handful.These spot checks have _already_ uncovered several bugs. The spot checks do the following:
+
+- Make assertions about the total number of paragraphs.
+- Make assertions about the presence of snippets of text in the body.
+
+The handful of checked reviews I added span from 2001 to 2020 (and hopefully capture some of the changes Pitchfork implemented in that period). For each, I have tried to add one snippet from the start and one from the end of the review. I also made sure to add checks of weird unicode when I find it.
