@@ -36,7 +36,7 @@ with artist_group as (
     from {{ ref('tombstones') }} as tombstones
     inner join {{ ref('tombstone_label_map') }} as label_map
         on tombstones.review_tombstone_id = label_map.review_tombstone_id
-    group by review_url
+    group by tombstones.review_url
 )
 
 , tombstone_group as (
