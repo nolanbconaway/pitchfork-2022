@@ -10,3 +10,5 @@ tqdm==4.62.3
 dbt-core==1.0.0
 dbt-sqlite==1.0.0
 sqlfluff-templater-dbt==0.9.0
+
+markupsafe==2.0.1
