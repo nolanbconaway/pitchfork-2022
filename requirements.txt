@@ -1,5 +1,5 @@
 beautifulsoup4==4.10.0
-black==21.11b1
+black==22.3.0
 lxml==4.6.4
 pydantic==1.8.2
 requests==2.26.0
