@@ -158,9 +158,13 @@ def insert_review(db: sqlite3.Connection, review_url: str, review: Review):
 
     insert_many(
         db,
-        "label_review_map",
-        ["review_url", "label"],
-        [(review_url, label) for label in review.labels],
+        "tombstone_label_map",
+        ["review_tombstone_id", "label"],
+        [
+            (f"""{review_url}-{idx}""", label)
+            for idx, tombstone in enumerate(review.tombstones)
+            for label in (tombstone.labels or [])
+        ],
     )
     insert_many(
         db,

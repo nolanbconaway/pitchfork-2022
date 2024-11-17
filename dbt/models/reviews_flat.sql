@@ -31,10 +31,12 @@ with artist_group as (
 
 , label_group as (
     select
-        review_url
-        , group_concat(label, ', ') as labels
-    from {{ ref('label_review_map') }}
-    group by review_url
+        tombstones.review_url
+        , group_concat(label_map.label, ', ') as labels
+    from {{ ref('tombstones') }} as tombstones
+    inner join {{ ref('tombstone_label_map') }} as label_map
+        on tombstones.review_tombstone_id = label_map.review_tombstone_id
+    group by tombstones.review_url
 )
 
 , tombstone_group as (

@@ -7,6 +7,7 @@ import gzip
 import json
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -29,4 +30,5 @@ if __name__ == "__main__":
     with tempfile.NamedTemporaryFile(mode="w", suffix=".html") as f:
         soup = BeautifulSoup(html, "lxml")
         f.write(html)
-        subprocess.call(["google-chrome", f.name])
+        subprocess.call(["firefox", f.name])
+        time.sleep(1)

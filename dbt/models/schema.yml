@@ -98,16 +98,16 @@ models:
               to: ref('reviews')
               field: review_url
 
-  - name: label_review_map
+  - name: tombstone_label_map
     columns:
       - name: label
         tests:
           - not_null
-      - name: review_url
+      - name: review_tombstone_id
         tests:
           - relationships:
-              to: ref('reviews')
-              field: review_url
+              to: ref('tombstones')
+              field: review_tombstone_id
 
   - name: genre_review_map
     columns:
