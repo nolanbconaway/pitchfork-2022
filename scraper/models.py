@@ -11,11 +11,11 @@ def sanitize_paragraph(para: str) -> str:
 
     return (
         para.strip()
-        .replace(u"\u00A0", " ")  # non breaking space
-        .replace(u"\u2018", "'")  # left single quote
-        .replace(u"\u2019", "'")  # right single quote
-        .replace(u"\u201C", '"')  # left double quote
-        .replace(u"\u201D", '"')  # right double quote
+        .replace("\u00A0", " ")  # non breaking space
+        .replace("\u2018", "'")  # left single quote
+        .replace("\u2019", "'")  # right single quote
+        .replace("\u201C", '"')  # left double quote
+        .replace("\u201D", '"')  # right double quote
     )
 
 
@@ -57,6 +57,7 @@ class Tombstone(BaseModel):
     title: str
     release_years: Union[list[int], None]
     score: float
+    labels: list[str]
     best_new_music: bool
     best_new_reissue: bool
 
@@ -76,6 +77,7 @@ class Tombstone(BaseModel):
             title=cls.get_title(soup),
             release_years=cls.get_release_years(soup),
             score=cls.get_score(soup),
+            labels=cls.get_release_labels(soup),
             best_new_music=cls.get_best_new_music(soup),
             best_new_reissue=cls.get_best_new_reissue(soup),
         )
@@ -113,12 +115,16 @@ class Tombstone(BaseModel):
         bnm = soup.find("p", {"class": "bnm-txt"})
         return bnm is not None and "reissue" in bnm.text.lower()
 
+    @classmethod
+    def get_release_labels(cls, soup: BeautifulSoup) -> list[str]:
+        ul = soup.find("ul", {"class": ["labels-list"]})
+        return unique([i.text.strip() for i in ul.findAll("li")])
+
 
 class Review(BaseModel):
     artists: list[Artist]
     body: str
     is_sunday_review: bool
-    labels: list[str]
     genres: list[str]
     pub_date: datetime.datetime
     authors: list[str]
@@ -168,7 +174,6 @@ class Review(BaseModel):
             genres=cls.get_genres(soup),
             body=cls.get_review_body(soup),
             is_sunday_review=cls.detect_sunday_review(soup),
-            labels=cls.get_release_labels(soup),
             pub_date=cls.get_pub_date(soup),
             authors=cls.get_authors(soup),
             tombstones=cls.get_tombstones(soup),
@@ -197,11 +202,6 @@ class Review(BaseModel):
     def get_pub_date(soup: BeautifulSoup) -> datetime.datetime:
         time_ = soup.find("time", {"class": "pub-date"})
         return datetime.datetime.fromisoformat(time_["datetime"])
-
-    @classmethod
-    def get_release_labels(cls, soup: BeautifulSoup) -> list[str]:
-        ul = soup.find("ul", {"class": ["labels-list"]})
-        return unique([i.text.strip() for i in ul.findAll("li")])
 
     @staticmethod
     def get_review_body(soup: BeautifulSoup) -> str:
